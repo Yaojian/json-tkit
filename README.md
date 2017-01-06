@@ -1,2 +1,3 @@
 # json-tkit
-JSON toolkit
+
+`json-tkit` is a toolkit for JSON.
