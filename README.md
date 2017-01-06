@@ -2,6 +2,11 @@
 
 `json-tkit` is a toolkit for JSON.
 
+It supports serializing javascript object with circular references to JSON and vice versa.
+
+## Motivation
+
+Inspiring [JSON-js](https://github.com/douglascrockford/JSON-js) with NPM and TypeScript support.
 
 ## Installation
 
@@ -13,15 +18,13 @@ npm install json-tkit
 
 ### prerequest: import the module 
 
-```javascript
+```typescript
 import * as jsonx from "json-tkit";
 ```
 
 ### Serialize an object with circular reference
 
-```javascript
-import * as jsonx from "json-tkit";
-
+```typescript
 let o: any = {};
 o.o = o;
 
