@@ -16,38 +16,42 @@ export function decycle(obj: any, replacer?: TReplacer) {
     if (replacer && !(replacer instanceof Function)) throw Error("Invalid argument 'replacer', it should be a function or null.");
 
     let cache = new Cache();
-    return internalDecycle(cache, obj, "$", replacer);
-}
+    //return internalDecycle(cache, obj, "$", replacer);
 
-function internalDecycle(cache: Cache, obj: any, path: string, replacer: TReplacer) : any {
-    if (typeof obj === "object" && obj !== null && isPrimitiveWrapper(obj) === false) {
-        if (replacer) replacer(obj);
 
-        let cachedPath = cache.get(obj);
-        if (cachedPath !== undefined) {
-            return {$ref: cachedPath};
+    function internalDecycle(value: any, path: string): any {
+        if (typeof value === "object" && value !== null && isPrimitiveWrapper(value) === false) {
+            if (replacer) replacer(value);
+
+            let cachedPath = cache.get(value);
+            if (cachedPath !== undefined) {
+                return {$ref: cachedPath};
+            }
+
+            //Caches obj and it's path
+            cache.set(value, path);
+
+            if (Array.isArray(value)) {
+                //  decycles each element
+                let decycled: Array<any> = [];
+                value.forEach(function (element: any, index: number) {
+                    decycled[index] = internalDecycle(element, `${path}[${index}]`);
+                });
+                return decycled;
+            } else {
+                //  decycles each property value
+                let decycled: any = {};
+                Object.keys(value).forEach(function (name) {
+                    decycled[name] = internalDecycle(value[name], `${path}[${name}]`);
+                });
+                return decycled;
+            }
         }
-
-        //Caches obj and it's path
-        cache.set(obj, path);
-
-        if (Array.isArray(obj)) {
-            //  decycles each element
-            let decycled : Array<any> = [];
-            obj.forEach(function (element: any, index: number) {
-                decycled[index] = internalDecycle(cache, element, `${path}[${index}]`, replacer);
-            });
-            return decycled;
-        } else {
-            //  decycles each property value
-            let decycled: any = {};
-            Object.keys(obj).forEach(function (name) {
-                decycled[name] = internalDecycle(cache, obj[name], `${path}[${name}]`, replacer);
-            });
-            return decycled;
-        }
+        return value;
     }
-    return obj;
+
+    let result = internalDecycle(obj, "$");
+    return result;
 }
 
 export function deserialize(jsonText: string) {
@@ -55,45 +59,45 @@ export function deserialize(jsonText: string) {
     return retrocycle(jsonObject);
 }
 
-export function retrocycle(obj: any) {
-    "use strict";
-
-    let $ = obj;
-    internalRetrocycle($);
-    return $;
-}
 
 /** The regular expression for testing if the property value is a circular object reference. */
 const cycleMatcher : RegExp = /^\$(?:\[(?:\d+|"(?:[^\\"\u0000-\u001f]|\\([\\"\/bfnrt]|u[0-9a-zA-Z]{4}))*")\])*$/;
 
-function internalRetrocycle(obj: any) {
-    if (obj && typeof obj === "object") {
-        if (Array.isArray(obj)) {
-            //  process each element
-            obj.forEach(function (element: any, index: number) {
-                if (typeof element === "object" && element !== null) {
-                    let path = element.$ref;
-                    if (typeof path === "string" && cycleMatcher.test(path)) {
-                        obj[index] = eval(path);
-                    } else {
-                        internalRetrocycle(element);
+export function retrocycle($: any) {
+    "use strict";
+
+    function internalRetrocycle(obj: any): void {
+        if (obj && typeof obj === "object") {
+            if (Array.isArray(obj)) {
+                //  process each element
+                obj.forEach(function (element: any, index: number) {
+                    if (typeof element === "object" && element !== null) {
+                        let path = element.$ref;
+                        if (typeof path === "string" && cycleMatcher.test(path)) {
+                            obj[index] = eval(path);
+                        } else {
+                            internalRetrocycle(element);
+                        }
                     }
-                }
-            });
-        } else {
-            Object.keys(obj).forEach(function (name: string) {
-                let prop = obj[name];
-                if (typeof prop === "object" && prop !== null) {
-                    let path = prop.$ref;
-                    if (typeof path === "string" && cycleMatcher.test(path)) {
-                        obj[name] = eval(path);
-                    } else {
-                        internalRetrocycle(prop);
+                });
+            } else {
+                Object.keys(obj).forEach(function (name: string) {
+                    let prop = obj[name];
+                    if (typeof prop === "object" && prop !== null) {
+                        let path = prop.$ref;
+                        if (typeof path === "string" && cycleMatcher.test(path)) {
+                            obj[name] = eval(path);
+                        } else {
+                            internalRetrocycle(prop);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
+
+    internalRetrocycle($);
+    return $;
 }
 
 /** Returns if `obj` is of an wrapper of simple type. */

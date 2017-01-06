@@ -40,5 +40,10 @@ describe("json-serialization-helper suite", function () {
             let obj = jsonx.deserialize(text);
             assert.deepEqual({}, obj);
         });
+        it("returns object when JSON has `$href`", function () {
+            let text = '{"o":{"$ref":"$"}}';
+            let obj = jsonx.deserialize(text);
+            assert.isTrue(obj === obj.o);
+        });
     });
 });
