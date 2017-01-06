@@ -2,3 +2,4 @@
 .gitignore
 dist/*.spec.d.ts
 dist/*.spec.js
+dist/*.spec.js.map
