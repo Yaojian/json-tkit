@@ -19,12 +19,15 @@ import * as jsonx from "json-tkit";
 
 ### Serialize an object with circular reference
 
+```javascript
+import * as jsonx from "json-tkit";
 
+let o: any = {};
+o.o = o;
 
-## API
+let s = jsonx.serialize(o);
+console.log(s);
 
-### `serialize`
-
-```
-
+let o2 = jsonx.deserialize(s);
+console.log(o2.o == o2);
 ```
