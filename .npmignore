@@ -1,0 +1,4 @@
+.idea
+.gitignore
+dist/*.spec.d.ts
+dist/*.spec.js
