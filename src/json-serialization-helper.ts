@@ -5,7 +5,7 @@ class Cache extends WeakMap<Object, string> {
 
 }
 
-export function serialize(obj: any, replacer ?: TReplacer): string {
+export function stringify(obj: any, replacer ?: TReplacer): string {
     let decycled = decycle(obj, replacer);
     return JSON.stringify(decycled)
 }
@@ -54,7 +54,7 @@ export function decycle(obj: any, replacer?: TReplacer) {
     return result;
 }
 
-export function deserialize(jsonText: string) {
+export function parse(jsonText: string) {
     let jsonObject = JSON.parse(jsonText);
     return retrocycle(jsonObject);
 }

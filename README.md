@@ -28,9 +28,9 @@ import * as jsonx from "json-tkit";
 let o: any = {};
 o.o = o;
 
-let s = jsonx.serialize(o);
+let s = jsonx.stringify(o);
 console.log(s);
 
-let o2 = jsonx.deserialize(s);
+let o2 = jsonx.parse(s);
 console.log(o2.o == o2);
 ```
